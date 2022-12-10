@@ -1,0 +1,14 @@
+[flake8]
+strictness = short
+docstring_style = sphinx
+max-line-length = 79
+extend-ignore = E203, W503
+# ^  Black-compatible
+#    E203 and W503 have edge cases handled by black
+per-file-ignores =
+    __init__.py: F401
+exclude =
+    build
+    dist
+    .eggs
+    .git

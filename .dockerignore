@@ -1,0 +1,15 @@
+**/*.log
+**/.env
+.dockerignore
+.git
+.gitignore
+.gitlab-ci.yml
+.idea
+.mypy_cache
+.pre-commit-config.yaml
+.pytest_cache
+Dockerfile
+Dockerfile.*
+ansible
+*.db
+samples/
