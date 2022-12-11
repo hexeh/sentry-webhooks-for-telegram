@@ -121,7 +121,7 @@ class BasicInstallation(BaseModel):
 
 class SentryWebhook(BaseModel):
     action: str
-    installation: BasicInstallation
+    installation: Optional[BasicInstallation]
     data: Union[
         IssueData,
         MetricAlertData,

@@ -35,6 +35,10 @@ async def process_webhook(
     scope = request.scope
     resource = scope.get("sentry-resource")
     log.info(f"new event with resource {resource} for slut {project_id}")
+    if mapping is None:
+        log.error(f"new webhook recieved for unconfigured slug - {project_id}")
+        response.status_code = status.HTTP_403_FORBIDDEN
+        return response
     if not scope.get("sentry-digest-valid", True):
         log.warning(f"{project_id} - {resource} - invalid digest")
         response.status_code = status.HTTP_403_FORBIDDEN
