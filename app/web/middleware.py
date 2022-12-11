@@ -29,15 +29,18 @@ class SentryProcessMiddleware:
                     "Sentry-Hook-Timestamp"
                 )
                 signature = request.headers.get("Sentry-Hook-Signature")
-                log.info(f"new hook signature - {signature}")
-                digest = hmac.new(
-                    key=self.sentry_secret.encode("utf-8"),
-                    msg=body,
-                    digestmod=hashlib.sha256,
-                ).hexdigest()
-                digest_check = hmac.compare_digest(digest, signature)
-                scope["sentry-digest-valid"] = digest and digest_check
-                log.info(f"digest check - {digest}")
+                if scope["sentry-resource"] and signature:
+                    log.info(f"new hook signature - {signature}")
+                    digest = hmac.new(
+                        key=self.sentry_secret.encode("utf-8"),
+                        msg=body,
+                        digestmod=hashlib.sha256,
+                    ).hexdigest()
+                    digest_check = hmac.compare_digest(digest, signature)
+                    scope["sentry-digest-valid"] = digest and digest_check
+                    log.info(f"digest check - {digest}")
+                else:
+                    scope["sentry-digest-valid"] = True
                 return message
 
         else:
