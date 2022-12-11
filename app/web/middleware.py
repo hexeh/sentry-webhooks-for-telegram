@@ -29,6 +29,7 @@ class SentryProcessMiddleware:
                     "Sentry-Hook-Timestamp"
                 )
                 signature = request.headers.get("Sentry-Hook-Signature")
+                log.info(f"new hook signature - {signature}")
                 digest = hmac.new(
                     key=self.sentry_secret.encode("utf-8"),
                     msg=body,
@@ -36,6 +37,7 @@ class SentryProcessMiddleware:
                 ).hexdigest()
                 digest_check = hmac.compare_digest(digest, signature)
                 scope["sentry-digest-valid"] = digest and digest_check
+                log.info(f"digest check - {digest}")
                 return message
 
         else:
