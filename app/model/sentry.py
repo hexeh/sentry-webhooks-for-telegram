@@ -130,4 +130,4 @@ class SentryWebhook(BaseModel):
         CommentData,
         ErrorData,
     ]
-    actor: SentryActor
+    actor: Optional[SentryActor]
