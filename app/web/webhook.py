@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from typing import Any, Union
 
 from dependency_injector.wiring import inject
 from fastapi import APIRouter, Request, Response, status
@@ -19,22 +20,26 @@ log = logging.getLogger(__name__)
 async def process_webhook(
     project_id: int,
     request: Request,
-    webhook: SentryWebhook,
+    webhook: Union[SentryWebhook, Any],
     response: Response,
     bot: TelegramBot = get_dependency("bot"),
     storage: MapperStorage = get_dependency("storage"),
 ):
+    if type(webhook) != SentryWebhook:
+        log.error(f"undetermined webhook body: {webhook}")
+        response.status_code = status.HTTP_403_FORBIDDEN
+        return response
     try:
         mapping: ChatMapping = storage.get_entity_by_key(
             ChatMapping, project_id
         )
     except Exception:
-        log.error(f"new webhook recieved for unconfigured slug - {project_id}")
+        log.error(f"new webhook received for unconfigured slug - {project_id}")
         response.status_code = status.HTTP_403_FORBIDDEN
         return response
     scope = request.scope
     resource = scope.get("sentry-resource")
-    log.info(f"new event with resource {resource} for slut {project_id}")
+    log.info(f"Sentry event with resource {resource} for slug {project_id}")
     if mapping is None:
         log.error(f"new webhook recieved for unconfigured slug - {project_id}")
         response.status_code = status.HTTP_403_FORBIDDEN
