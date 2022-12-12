@@ -1,3 +1,5 @@
+from sqlite3 import OperationalError
+
 from dependency_injector import containers, providers
 from dependency_injector.providers import Provider
 from fastapi import FastAPI
@@ -8,7 +10,10 @@ from app.util.ioc import already_initialized
 
 
 async def initialize_resources(bot: TelegramBot, storage: MapperStorage):
-    storage.create_all()
+    try:
+        storage.create_all()
+    except OperationalError:
+        pass
     test_entity = storage.get_entity_by_key(ChatMapping, 123)
     if test_entity is not None:
         print(test_entity)

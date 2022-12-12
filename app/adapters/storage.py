@@ -34,7 +34,7 @@ STORAGE_ENGINE = create_engine(f"sqlite:///{STORAGE_NAME}.db")
 
 
 @event.listens_for(STORAGE_ENGINE, "first_connect")
-def schema_attach(dbapi_connection, connection_record):
+def schema_attach(dbapi_connection, _):
     dbapi_connection.execute(
         f"ATTACH DATABASE '{STORAGE_NAME}.db' AS {STORAGE_NAME}"
     )

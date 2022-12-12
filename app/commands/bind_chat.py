@@ -53,6 +53,20 @@ async def bind_chat(
         project_name=args[1],
         chat_id=chat_id,
     )
+    mapping = storage.get_entity_by_key(ChatMapping, args[0])
+    if mapping is not None:
+        message = Template(
+            open("./app/messages/commands/bind_existing.html").read()
+        )
+        await event.reply(
+            message.render(
+                project_id=args[0],
+                project_name=args[1],
+                same_chat=mapping.chat_id == new_mapping.chat_id,
+            ),
+            parse_mode="HTML",
+        )
+        return
     storage.add_entity(new_mapping)
     mapping = storage.get_entities_by_chat(ChatMapping, chat_id)
     log.info(f"updated chat mapping: {mapping}")
