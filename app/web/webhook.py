@@ -7,7 +7,7 @@ from fastapi import APIRouter, Request, Response, status
 from jinja2 import Template
 
 from app.adapters import MapperStorage, TelegramBot
-from app.model.sentry import SentryWebhook
+from app.model.sentry import SentryWebhookEvent
 from app.model.storage import ChatMapping
 from app.util.ioc import get_dependency
 
@@ -20,13 +20,13 @@ log = logging.getLogger(__name__)
 async def process_webhook(
     project_id: int,
     request: Request,
-    webhook: Union[SentryWebhook, Any],
+    webhook: Union[SentryWebhookEvent, Any],
     response: Response,
     bot: TelegramBot = get_dependency("bot"),
     storage: MapperStorage = get_dependency("storage"),
 ):
-    if type(webhook) != SentryWebhook:
-        log.error(f"undetermined webhook body: {webhook}")
+    if type(webhook) != SentryWebhookEvent:
+        log.error(f"undetermined webhook body:{request.scope} :{webhook}")
         response.status_code = status.HTTP_403_FORBIDDEN
         return response
     try:
@@ -62,16 +62,17 @@ async def process_webhook(
             message = Template(
                 open("./app/messages/webhook/not_implemented.html").read()
             )
+        msg = f'{webhook.event.culprit} - {",".join(s.formatted for s in webhook.event.logentry)}'  # noqa
         await bot.send_message(
             mapping.chat_id,
             message.render(
                 resource=resource,
                 project_name=mapping.project_name,
-                event_id=webhook.data.event.event_id,
-                level=webhook.data.event.level,
-                logger=webhook.data.event.logger,
-                message=webhook.data.event.message,
-                issue_url=webhook.data.event.issue_url,
+                event_id=webhook.event.event_id,
+                level=webhook.event.level,
+                logger=webhook.event.logger,
+                message=msg,
+                issue_url=webhook.url,
             ),
             "HTML",
         )

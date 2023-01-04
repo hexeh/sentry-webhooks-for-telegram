@@ -1,5 +1,5 @@
 import uuid
-from typing import List, Literal, Optional, Union
+from typing import Any, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Extra
 
@@ -35,10 +35,10 @@ class SentryInstallation(BaseModel):
 
 class SentryAlertEvent(BaseModel):
     url: str
-    web_url: str
     issue_url: str
-    issue_id: str
+    issue_id: Optional[str]
     event_id: str
+    web_url: Optional[str]
     level: Optional[str]
     logger: Optional[str]
     message: Optional[str]
@@ -66,11 +66,12 @@ class SentryMetricAlertRule(BaseModel):
 
 class SentryIssue(BaseModel):
     url: str
-    web_url: str
-    project_url: str
+    web_url: Optional[str]
+    project_url: Optional[str]
     id: str
-    type: str
-    event_id: str
+    type: Optional[str]
+    event_id: Optional[str]
+    culprit: Optional[str]
 
     class Config:
         extra = Extra.allow
@@ -131,3 +132,38 @@ class SentryWebhook(BaseModel):
         ErrorData,
     ]
     actor: Optional[SentryActor]
+
+
+class SentryLogEntry(BaseModel):
+    formatted: str
+    params: Optional[List[Any]]
+
+
+class SentryGenericEvent(BaseModel):
+    event_id: str
+    logger: Optional[str]
+    level: Optional[str]
+    type: str
+    culprit: Optional[str]
+    transaction: Optional[str]
+    environment: str
+    metadata: Optional[dict]
+    sdk: Optional[dict]
+    extra: Optional[dict]
+    tags: Optional[List[dict]]
+    modules: Optional[dict]
+    platform: str
+    contexts: Optional[dict]
+    logentry: Optional[SentryLogEntry]
+
+
+class SentryWebhookEvent(BaseModel):
+    id: str
+    project: str
+    project_name: str
+    project_slug: str
+    logger: Optional[str]
+    level: Optional[str]
+    url: Optional[str]
+    triggering_rules: Optional[List[str]]
+    event: SentryGenericEvent
